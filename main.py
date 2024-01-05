@@ -1,12 +1,14 @@
 import configparser
 import time
-from sensor_simulator import read_light_intensity, simulate_blinds_movement
-from mqtt_publisher import (
+from SensorSim.sensor_simulator import read_light_intensity, simulate_blinds_movement
+
+from mqtt.mqtt_publisher import (
     publish_blinds_position,
     publish_light_intensity,
     publish_movement_counter
 )
-from influxdb_writer import write_to_influxdb
+
+from Influxdb.influxdb_writer import write_to_influxdb
 
 # Load configuration from the file
 config = configparser.ConfigParser()
@@ -52,9 +54,9 @@ try:
             time_since_last_change = 0  # Reset time_since_last_change
 
         # Writing to InfluxDB
-        #write_to_influxdb("sensor_data", "blinds_position", new_position)
-        #write_to_influxdb("sensor_data", "light_intensity", light_level)
-        #write_to_influxdb("sensor_data", "movement_counter", movement_counter)
+        write_to_influxdb("sensor_data", "blinds_position", new_position)
+        write_to_influxdb("sensor_data", "light_intensity", light_level)
+        write_to_influxdb("sensor_data", "movement_counter", movement_counter)
 
         time.sleep(5)
 except KeyboardInterrupt:
