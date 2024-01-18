@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 
 client = mqtt.Client("BlindsClient")
-client.connect("localhost", 1883)
+client.connect("mqtt", 1883)
 
 def publish_blinds_position(position):
     client.publish("blinds/position", position)

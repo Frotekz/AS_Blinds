@@ -1,29 +1,29 @@
-version: '3.8'
-
+version: '3.6'
 services:
-  mqtt-broker:
+  mqtt:
     image: eclipse-mosquitto:latest
-    container_name: my_mqtt_broker
+    container_name: ab_mosquitto
     restart: always
     volumes:
-      - ./mosquitto/mosquitto.conf:/mosquitto/mosquitto.conf
+      - ./mqtt/mosquitto.conf:/mqtt/mosquitto.conf
     networks:
-      se4as-network:
-       ipv4_address: 172.20.0.101
+     as_blinds_se4as: {}
     ports:
       - "1883:1883"
+      - "9001:9001"
+    
       
   main-app:
     build:
      dockerfile: dockerfile
     depends_on:
       - influxdb
+      - mqtt
     networks:
-      se4as-network:
-       ipv4_address: 172.20.0.102
+     as_blinds_se4as: {}
 
   influxdb:
-    image: influxdb:2.4-alpine
+    image: influxdb:latest
     container_name: influxdb_se4as
     ports:
       - "8086:8086"
@@ -37,15 +37,31 @@ services:
       - DOCKER_INFLUXDB_INIT_USERNAME=admin
       - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
     networks:
-      se4as-network:
-       ipv4_address: 172.20.0.103
+     as_blinds_se4as: {}
+    
+  telegraf:
+    image: telegraf
+    container_name: telegraf
+    restart: always
+    volumes:
+    - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - influxdb
+      - mqtt
+    links:
+      - influxdb
+    ports:
+      - '8125:8125'    
+    networks:
+      as_blinds_se4as: {}
+
 
 volumes:
   influxdb_data: {}
 
 networks:
-  se4as-network:
-    driver: bridge
-    ipam:
-      config:
-       - subnet: 172.20.0.0/16
+  as_blinds_se4as:
+   driver: bridge
+   ipam: 
+    config:
+     - subnet: 172.20.0.0/16
